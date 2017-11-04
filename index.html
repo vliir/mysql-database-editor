@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ru-ru" dir="ltr">
+<head>
+		   <!-- <meta charset="utf-8">
+			<meta http-equiv="content-type" content="text/html; charset=utf-8" />-->
+            <title>Админка для работы с базами данных</title>
+			<script type="text/javascript" src="js/jquery-3.1.1.min.js"></script>
+			<!--<script type="text/javascript" src="js/contr.js"></script>-->
+			<link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+<div class="main-cont">
+<!--Заголовок header -->
+<header class="header">
+<h1 class="v_center ">Просмотр и редактирование таблиц в базе данных mysql</h1>
+<!-- Колонки для вывода данных к подключенной базе данных-->
+<div class="clearffix">
+ <div class="col-5-float v_center">
+  <span>Текущая таблица</span>
+  <div></div>
+  <div class="v-but" id="tab-name">
+  <span>&#160;</span>
+  </div>
+ </div>
+ <div class="col-5-float v_center">
+  <span>Хост</span>
+  <div></div>
+  <div class="v-but" id="hst">
+  <span></span>
+  </div>
+  </div>
+ <div class="col-5-float v_center">
+  <span>База данных</span>
+  <div></div>
+  <div class="v-but" id="base-name">
+  <span></span>
+  </div>
+ </div>
+ <div class="col-5-float v_center">
+  <span>Логин</span>
+  <div></div>
+  <div class="v-but" id="user-name">
+  <span></span>
+  </div>
+ </div>
+ <!-- Поле зарезервировано под пароль
+ <div class="col-5-float">
+  <span>Пароль</span>
+  <div id="pas">
+   <span></span>
+  </div>
+ </div>
+</div>
+-->
+</header>
+<!--Левый тулбар-->
+<div class="lb">
+<p class="lb-h">Таблицы БД</p>
+ <div id="lbb"><ul></ul></div>
+</div>
+
+<!--Блок вывода контента-->
+<div id="cont">
+
+<table></table>
+</div>
+<!--Правый талбар-->
+<div class="rb">
+
+ <div class="rb-vd">
+  <span>
+   Строк
+  </span>
+ </div>
+<div id="rb-str"><span>&#160;</span></div>
+ <div class="rb-vd">
+  <span>
+   Столбцов
+  </span>
+ </div>
+<div id="rb-stl"><span>&#160;</span></div>
+</div>
+<!-- Подвал footer -->
+<footer class="footer">
+<span class="align-center"></span>
+ <button id="is" disabled type="button">Добавить строку</button>
+ <button id="ds" disabled type="button">Удалить строку</button>
+ <button id="otm" disabled type="button">Отменить</button>
+ <button id="save" disabled type="button">Сохранить</button>
+</footer>
+</div>
+
+<!--Модальное окно для вывода ошибки-->
+<div id="mod-err-fon">
+</div>
+ <div id="mod-err">
+  <p class="mod-err-h">Ошибка!</p>
+  <p id="mod-err-txt" >
+  <span class="vert-center"></span>
+  <span>
+    Текст ошибки
+   </span>
+  </p>
+  <button id="mod-err-ok" type="button" >OK</button>
+ </div>
+
+<!--конец модального окна-->
+
+<script type="text/javascript" src="js/contr.js"></script>
+
+</body>
+</html>
