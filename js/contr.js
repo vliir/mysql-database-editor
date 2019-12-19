@@ -24,12 +24,12 @@ drav.tab_name = function(obj) {
 	//$("#user-name").children("span").replaceWith("<span>"+obj.arr[1]+"</span>");
 	
     /*Вывод имен таблиц БД*/
-	$("#lbb").children("ul").replaceWith("<ul></ul>");
-	for(var i=0; i<obj.tab_names.length; i++) {
+    $("#lbb").children("ul").replaceWith("<ul></ul>");
+    for(var i=0; i<obj.tab_names.length; i++) {
         var elem = $("<li>"+obj.tab_names[i]+"</li>");
         elem.click(function() { o_kn(this); });
         $("#lbb").children("ul").append(elem);
-	} 
+    } 
 }
 
 //Прорисовка имени текущей таблицы
