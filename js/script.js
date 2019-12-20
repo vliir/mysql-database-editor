@@ -122,6 +122,7 @@
                 for(var i=0; i < tableBody.length; i++) {
                     $("#cont").children("table").append('<tr id="str'+i+'"></tr>');
                     var elem = $('<td><input type="checkbox" name="'+i+'"></td>');
+                    elem.click(function(){clickCheckbox(this)});
                     $("#cont").children("table").children("tr").eq(i).append(elem);
                     
                     for(var j=0; j < tableBody[i].length; j++) {
@@ -129,13 +130,39 @@
                         var zn="num"+i+"-"+j;
                         elem.attr("data-num",zn);
                         elem.attr("contenteditable","true")
-                        //elem.focus(function(){cell_cl(this)});
+                        elem.focus(function(){cellIn(this)});
                         elem.focusout(function(){cellOut(this)});
                         $("#cont").children("table").children("tr").eq(i).append(elem);
                     }
                 }
             }
             cont();
+    
+            //Прокрутка таблицы
+            elem = document.getElementById("cont");
+        
+            let tr1 = elem.querySelectorAll("tr");
+            let tdh = tr1[0].querySelectorAll("td");  
+            let tdh1 = tr1[1].querySelectorAll("td"); 
+            let td1 = elem.querySelectorAll("td:first-child");
+
+            $(elem).scroll(function() {
+
+                //Непрокручиваем первую строку
+                //tr1.style.cssText = "top:"+this.scrollTop+"px";
+                for (var i=0, max=tdh.length; i<max; i++) {
+                    tdh[i].style.cssText = "position:relative;background-color:#d6dde8;border:1px solid #000;z-index:100;top:"+this.scrollTop+"px";
+                    tdh1[i].style.cssText = "position:relative;background-color:#d6dde8;z-index:100;top:"+this.scrollTop+"px";
+                }
+	
+                //И первый столбец
+                for(var i=0, max=td1.length; i<max; i++){
+                    td1[i].style.cssText = "position:relative;z-index:200;left:"+this.scrollLeft+"px";
+                }
+                td1[0].style.cssText = "position:relative;background-color:#d6dde8;z-index:250;top:"+this.scrollTop+"px;left:"+this.scrollLeft+"px";
+                td1[1].style.cssText = "position:relative;background-color:#d6dde8;z-index:250;top:"+this.scrollTop+"px;left:"+this.scrollLeft+"px";
+            });
+        
         }
         
         //Печать количества строк и столбцов
@@ -163,8 +190,39 @@
                 var elem = $("<td></td>");
                 var zn="num"+i+"-"+j;
                 elem.attr("data-num",zn);
-                elem.attr("contenteditable","true")
+                elem.attr("contenteditable","true");
+                elem.focus(function(){cellIn(this)});
                 $("#cont").children("table").children("tr:last").append(elem);
+            }
+        }
+        
+        function enableButton(buttonName) {
+            if (buttonName == "addStr") {
+                $("button#is").removeAttr("disabled");
+            }
+            if (buttonName == "delStr") {
+                $("button#ds").removeAttr("disabled");
+            }
+            if (buttonName == "undo") {
+                $("button#otm").removeAttr("disabled");
+            }
+            if (buttonName == "SaveStr") {
+                $("button#save").removeAttr("disabled");
+            }
+        }
+        
+        function disableButton(buttonName) {
+            if (buttonName == "addStr") {
+                $("button#is").attr("disabled", "true");
+            }
+            if (buttonName == "delStr") {
+                $("button#ds").attr("disabled", "true");
+            }
+            if (buttonName == "undo") {
+                $("button#otm").attr("disabled", "true");
+            }
+            if (buttonName == "SaveStr") {
+                $("button#save").attr("disabled", "true");
             }
         }
         
@@ -179,6 +237,8 @@
         
         // Потеря фокуса ячейки таблицы
         function cellOut(obj) {
+            disableButton('SaveStr');
+            disableButton('undo');
             var atr = $(obj).attr("data-num");
             var str = atr.slice(3).split("-");
             var pole_name = tableHead[str[1]];
@@ -206,8 +266,7 @@
         }
         
         //Обработчик события клика по имени таблицы
-        function choiseTableName(obj) {
-            
+        function choiseTableName(obj) {          
             let tableName = $(obj).text();
             //Пометить активную таблицу
             $("div#lbb li").removeClass("lbb-activ");
@@ -216,15 +275,30 @@
             ajaxSender.update('choiseTableName', tableName);
         }
         
+        function cellIn() {
+            enableButton('SaveStr');
+            enableButton('undo');
+        }
+        
         //Обработчик события нажатия кнопки Добавить строку
         function addStr() {
+            enableButton('undo');
             if (ins_str == 0){
                 ins_str = 1;
                 newStr();
             } else {
-                but_save()
+                SaveStr()
                 newStr();
                 ins_str = 1;
+            }
+        }
+        
+        function clickCheckbox() {
+            activeCheckbox = $("input:checkbox:checked");
+            if (activeCheckbox.length > 0) {
+                enableButton('delStr');
+            } else {
+                disableButton('delStr');
             }
         }
         
@@ -236,6 +310,8 @@
         
         //Обработчик события нажатия кнопки отменить
         function undo() {
+            disableButton('SaveStr');
+            disableButton('undo');
             if (ins_str==1){
                 $("#cont").children("table").children("tr:last").remove();
                 ins_str=0;
@@ -244,6 +320,8 @@
         
         //Обработчик события нажатия кнопки Сохранить
         function SaveStr() {
+            disableButton('SaveStr');
+            disableButton('undo');
             if (ins_str == 1) {
                 if (tableBody.length > 0) {
                     var j = tableBody.length;
@@ -274,8 +352,8 @@
 	  
   
                 ajaxSender.update('SaveStr', s_obj);
-                cont();
-                ins_str=0;
+                showTableBody();
+                ins_str = 0;
             }
         }
         
@@ -300,7 +378,8 @@
         this.showCurrentTableName = showCurrentTableName;
         this.showTableBody = showTableBody;
         this.cont = cont;
-
+        this.enableButton = enableButton;
+        this.disableButton = disableButton;    
     }
     
     // Посредник
@@ -308,13 +387,8 @@
         
         let handler = {};
         
-        handler.choiseTableName = function(tableName) {
-            
-            $("button#is").removeAttr("disabled");
-            $("button#ds").removeAttr("disabled");
-            $("button#otm").removeAttr("disabled");
-            $("button#save").removeAttr("disabled");
-            
+        handler.choiseTableName = function(tableName) {           
+            table.enableButton("addStr");
             sent({cmd:1,dat:tableName});
         };
         
@@ -337,15 +411,16 @@
                 s_obj.dat = [];
                 s_obj.dat[0] = tableHead[primaryKey - 1];
         
-                for(var i=0; i < inch.length; i++) {
+                for(var i = 0; i < inch.length; i++) {
                     var bb = inch.eq(i).attr("name") - 0;
                     s_obj.dat[i+1] = tableBody[bb][primaryKey - 1];
-                    var ob_del = "tr#str"+bb;
+                    var ob_del = "tr#str" + bb;
                     $(ob_del).remove();
 	
-                    tableBody.splice(bb, 1);
+                    //tableBody.splice(bb, 1);
+                    delete tableBody[bb];
                 }
-                table.setTableBody(tableBody);
+                //table.setTableBody(tableBody);
         
                 sent(s_obj);
                 table.cont();
@@ -441,7 +516,7 @@
         this.update = update;
         this.firstRequest = firstRequest;
     }
-    
+
     table = new Table();
     ajaxSender = new AjaxSender();
     ajaxSender.firstRequest();
