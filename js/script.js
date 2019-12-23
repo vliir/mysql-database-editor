@@ -3,8 +3,8 @@
     //Виджет таблицы
     function Table() {
         
-        var ins_str=0; // Флаг: 1 - была нажата кнопка добавить; 0 - нет
-        var mos_otm=0; //Флаг: 1 - мышь находится на кнопке отменить
+        var ins_str = 0; // Флаг: 1 - была нажата кнопка добавить; 0 - нет
+        var mos_otm = 0; //Флаг: 1 - мышь находится на кнопке отменить
         
         //имя текущей (рабочей) таблицы
         let tableName = "";
@@ -20,6 +20,11 @@
         
         let primaryKey;
         let activeCheckbox;
+        let cellTextOld;
+        let cellText;
+        let poleName;
+        let PrimaryKeyVal;
+        let newStr = [];
         
         function setTableName(atr) {
             tableName = atr;
@@ -63,6 +68,22 @@
         
         function getActiveCheckbox() {
             return activeCheckbox;
+        }
+        
+        function getCellText() {
+            return cellText;
+        }
+        
+        function getPoleName() {
+            return poleName;
+        }
+        
+        function getPrimaryKeyVal() {
+            return primaryKeyVal;
+        }
+        
+        function getNewStr() {
+            return newStr;
         }
         
         /**
@@ -142,17 +163,21 @@
             elem = document.getElementById("cont");
         
             let tr1 = elem.querySelectorAll("tr");
+            let thead1 = elem.querySelector("thead");
             let tdh = tr1[0].querySelectorAll("td");  
             let tdh1 = tr1[1].querySelectorAll("td"); 
             let td1 = elem.querySelectorAll("td:first-child");
 
             $(elem).scroll(function() {
-
                 //Непрокручиваем первую строку
-                //tr1.style.cssText = "top:"+this.scrollTop+"px";
+                //thead1.style.cssText = "position:relative;top:"+this.scrollTop+"px";
+                //tr1[0].style.cssText = "position:relative;top:"+this.scrollTop+"px";
+                //tr1[1].style.cssText = "position:relative;top:"+this.scrollTop+"px";
+    
                 for (var i=0, max=tdh.length; i<max; i++) {
-                    tdh[i].style.cssText = "position:relative;background-color:#d6dde8;border:1px solid #000;z-index:100;top:"+this.scrollTop+"px";
-                    tdh1[i].style.cssText = "position:relative;background-color:#d6dde8;z-index:100;top:"+this.scrollTop+"px";
+                    let scroll = this.scrollTop;
+                    tdh[i].style.cssText = "position:relative;z-index:100;top:"+scroll+"px";
+                    tdh1[i].style.cssText = "position:relative;z-index:100;top:"+scroll+"px";
                 }
 	
                 //И первый столбец
@@ -177,7 +202,7 @@
         }  
         
         //Прорисовка пустой строки в конце текущей таблицы
-        function newStr() {
+        function newStrDraw() {
             if (tableBody.length > 0) {
                 var i = tableBody.length;
             } else {
@@ -226,6 +251,14 @@
             }
         }
         
+        function reset() {
+            cellText = '';
+            cellTextOld = '';
+            poleName = '';
+            primaryKeyVal = '';
+            newStr = [];
+        }
+        
         /*Задание обработчиков событий для кнопок в футере*/
         $("button#is").click(function(){addStr()});//нажата кнопка Добавить строку
         $("button#ds").click(function(){delStr()});//нажата кнопка Удалить строку
@@ -237,30 +270,20 @@
         
         // Потеря фокуса ячейки таблицы
         function cellOut(obj) {
-            disableButton('SaveStr');
-            disableButton('undo');
             var atr = $(obj).attr("data-num");
             var str = atr.slice(3).split("-");
-            var pole_name = tableHead[str[1]];
+            poleName = tableHead[str[1]];
             var bb = str[0];
-            var pri = tableBody[bb][primaryKey - 1];
-            var txt = $(obj).text();
+            primaryKeyVal = tableBody[bb][primaryKey - 1];
+            cellText = $(obj).text();
 
-            if (mos_otm==1){//Значит нажата кнопка отменить
-                $(obj).text(tableBody[bb][str[1]]);
+            if (mos_otm == 1){//Значит нажата кнопка отменить
+                $(obj).text(cellTextOld);
+                reset();
+                mos_otm = 0;
             } else {
-                //Формирование данных на редактирование
-                var s_obj = {};
-                s_obj.cmd = 4; // Команда на редактирование
-                s_obj.tab_name = tableName;// имя таблицы
-                s_obj.dat=[];
-                s_obj.dat[0] = tableHead[primaryKey - 1];//Имя поля первичного ключа
-                s_obj.dat[1] = pri; //Значение первичного ключа
-                s_obj.dat[2] = pole_name; // Имя редактируемого поля
-                s_obj.dat[3] = txt; // Значение редактируемого поля
-
-                if (txt != tableBody[str[0]][str[1]]) {
-                    ajaxSender.update('cellOut', s_obj);
+                if (cellText != cellTextOld) {
+                    ajaxSender.update('cellOut', '');
                 }
             }
         }
@@ -275,9 +298,10 @@
             ajaxSender.update('choiseTableName', tableName);
         }
         
-        function cellIn() {
+        function cellIn(obj) {
             enableButton('SaveStr');
             enableButton('undo');
+            cellTextOld = $(obj).text();
         }
         
         //Обработчик события нажатия кнопки Добавить строку
@@ -285,10 +309,10 @@
             enableButton('undo');
             if (ins_str == 0){
                 ins_str = 1;
-                newStr();
+                newStrDraw();
             } else {
                 SaveStr()
-                newStr();
+                newStrDraw();
                 ins_str = 1;
             }
         }
@@ -319,39 +343,21 @@
         }
         
         //Обработчик события нажатия кнопки Сохранить
-        function SaveStr() {
-            disableButton('SaveStr');
-            disableButton('undo');
+        function SaveStr() {          
             if (ins_str == 1) {
-                if (tableBody.length > 0) {
-                    var j = tableBody.length;
-                } else {
-                    var j = 0;
+         
+                //var arr = [];
+                //tableBody.push(arr);
+                let instr = $("#cont").children("table").children("tr:last").children("td");
+         
+                for(let i = 1; i < instr.length; i++) {
+                    newStr[i-1] = instr.eq(i).text();
+                    //instr.eq(i).focus(function(){cell_cl(this)});
+                    //instr.eq(i).focusout(function(){cell_ou(this)}); 
+                    //tableBody[j][i-1] = instr.eq(i).text();
                 }
-        
-                var arr = [];
-                tableBody.push(arr);
-                var instr=$("#cont").children("table").children("tr:last").children("td");
-                
-                var s_obj = {};
-                s_obj.cmd=3; // Команда на добавление строки 
-                s_obj.tab_name = tableName;// имя таблицы
-                s_obj.dat=[];
-        
-                for(var i=1;i<instr.length;i++) {
-                    s_obj.dat[i-1]=instr.eq(i).text();
-	 
-                    instr.eq(i).focus(function(){cell_cl(this)});
-                    instr.eq(i).focusout(function(){cell_ou(this)});
-	   
-                    tableBody[j][i-1] = instr.eq(i).text();
-                }
-	
-                var elem = $('<td><input type="checkbox" name="'+j+'"></td>');
-                $("#cont").children("table").children("tr:last").children("td").eq(0).replaceWith(elem);
-	  
-  
-                ajaxSender.update('SaveStr', s_obj);
+
+                ajaxSender.update('SaveStr', '');
                 showTableBody();
                 ins_str = 0;
             }
@@ -373,6 +379,10 @@
         this.getTableType = getTableType;
         this.getPrimaryKey = getPrimaryKey;
         this.getActiveCheckbox = getActiveCheckbox;
+        this.getCellText = getCellText;
+        this.getPoleName = getPoleName;
+        this.getPrimaryKeyVal = getPrimaryKeyVal;
+        this.getNewStr = getNewStr;
         this.showHostData = showHostData;
         this.showTablesNames = showTablesNames;
         this.showCurrentTableName = showCurrentTableName;
@@ -393,7 +403,25 @@
         };
         
         handler.cellOut = function(obj) {
-            sent(obj);
+            table.disableButton('SaveStr');
+            table.disableButton('undo');
+            
+            //Формирование данных на редактирование
+            let s_obj = {};
+            s_obj.cmd = 4; // Команда на редактирование
+            s_obj.tab_name = table.getTableName();// имя таблицы
+            s_obj.dat=[];
+            let tableHead = table.getTableHead();
+            let primaryKey = table.getPrimaryKey();
+            s_obj.dat[0] = tableHead[primaryKey - 1];//Имя поля первичного ключа
+            let primaryKeyVal = table.getPrimaryKeyVal();
+            s_obj.dat[1] = primaryKeyVal; //Значение первичного ключа
+            let poleName = table.getPoleName();
+            let cellText = table.getCellText();
+            s_obj.dat[2] = poleName; // Имя редактируемого поля
+            s_obj.dat[3] = cellText; // Значение редактируемого поля
+            sent(s_obj);
+            table.reset();
         };
         
         handler.delStr = function(obj) {
@@ -429,8 +457,18 @@
             }  
         };
         
-        handler.SaveStr = function(obj) {
-            sent(obj);
+        handler.SaveStr = function(obj) { 
+            table.disableButton('SaveStr');
+            table.disableButton('undo');
+    
+            let s_obj = {};
+            s_obj.cmd=3; // Команда на добавление строки 
+            s_obj.tab_name = table.getTableName();// имя таблицы
+            s_obj.dat=[];
+            s_obj.dat = table.getNewStr();
+                
+            sent(s_obj);
+            table.reset();
         };
         
         function update(action, atr) {
