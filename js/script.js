@@ -74,6 +74,10 @@
             return cellText;
         }
         
+        function getCellTextOld() {
+            return cellTextOld;
+        }
+        
         function getPoleName() {
             return poleName;
         }
@@ -118,31 +122,31 @@
     
             //Печать заголовков и метаданных
             if (tableHead.length>0) {
-                $("#cont").children("table").append("<thead><tr><td></td></tr></thead>");
+                $("#cont").children("table").append("<thead><tr><td><div class='tableHead'></div></td></tr></thead>");
    
-                for(var j=0; j < tableHead.length; j++) {
+                for(var j = 0; j < tableHead.length; j++) {
                     if ((primaryKey - 1) == j) {
                         var aa = tableHead[j] + ", PRI";
                     } else {
                         var aa = tableHead[j];
                     }
             
-                    $("#cont").children("table").children("thead").children("tr").eq(0).append("<td>"+aa+"</td>");
+                    $("#cont").children("table").children("thead").children("tr").eq(0).append("<td>"+aa+"<div class='tableHead'></div></td>");
                 }
             }
     
             if (tableType.length > 0) {
-                $("#cont").children("table").children("thead").append("<tr><td></td></tr>");
-                for(var j=0; j < tableType.length; j++){
-                    $("#cont").children("table").children("thead").children("tr").eq(1).append("<td>"+tableType[j]+"</td>");
+                $("#cont").children("table").children("thead").append("<tr><td><div class='tableHead'></div></td></tr>");
+                for(var j=0; j < tableType.length; j++) {
+                    $("#cont").children("table").children("thead").children("tr").eq(1).append("<td>"+tableType[j]+"<div class='tableHead'></div></td>");
                 }
             }
     
             //Печать тела таблицы
             if (tableBody.length > 0) {
-                for(var i=0; i < tableBody.length; i++) {
+                for(var i = 0; i < tableBody.length; i++) {
                     $("#cont").children("table").append('<tr id="str'+i+'"></tr>');
-                    var elem = $('<td><input type="checkbox" name="'+i+'"></td>');
+                    var elem = $('<td><input type="checkbox" name="'+i+'"><div class="tableHead"></div></td>');
                     elem.click(function(){clickCheckbox(this)});
                     $("#cont").children("table").children("tr").eq(i).append(elem);
                     
@@ -169,10 +173,6 @@
             let td1 = elem.querySelectorAll("td:first-child");
 
             $(elem).scroll(function() {
-                //Непрокручиваем первую строку
-                //thead1.style.cssText = "position:relative;top:"+this.scrollTop+"px";
-                //tr1[0].style.cssText = "position:relative;top:"+this.scrollTop+"px";
-                //tr1[1].style.cssText = "position:relative;top:"+this.scrollTop+"px";
     
                 for (var i=0, max=tdh.length; i<max; i++) {
                     let scroll = this.scrollTop;
@@ -282,9 +282,7 @@
                 reset();
                 mos_otm = 0;
             } else {
-                if (cellText != cellTextOld) {
-                    ajaxSender.update('cellOut', '');
-                }
+                ajaxSender.update('cellOut', '');
             }
         }
         
@@ -380,6 +378,7 @@
         this.getPrimaryKey = getPrimaryKey;
         this.getActiveCheckbox = getActiveCheckbox;
         this.getCellText = getCellText;
+        this.getCellTextOld = cellTextOld;
         this.getPoleName = getPoleName;
         this.getPrimaryKeyVal = getPrimaryKeyVal;
         this.getNewStr = getNewStr;
@@ -406,6 +405,10 @@
             table.disableButton('SaveStr');
             table.disableButton('undo');
             
+            let cellTextOld = table.getCellTextOld;
+            let cellText = table.getCellText();
+            if (cellText == cellTextOld) return false;
+            
             //Формирование данных на редактирование
             let s_obj = {};
             s_obj.cmd = 4; // Команда на редактирование
@@ -417,7 +420,6 @@
             let primaryKeyVal = table.getPrimaryKeyVal();
             s_obj.dat[1] = primaryKeyVal; //Значение первичного ключа
             let poleName = table.getPoleName();
-            let cellText = table.getCellText();
             s_obj.dat[2] = poleName; // Имя редактируемого поля
             s_obj.dat[3] = cellText; // Значение редактируемого поля
             sent(s_obj);

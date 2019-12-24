@@ -97,7 +97,7 @@ h1 {
     border-left:1px solid #1f2122;
 }
 
-#lbb{
+.leftNav{
     display:block;
     position:absolute;
     padding-left:5px;
@@ -111,13 +111,13 @@ h1 {
     padding:5px;
 }
 
-div#lbb li{
+div.leftNav li{
     margin-bottom:3px;
     box-shadow: 0px 1px 1px #575c63, -1px -1px 1px #f0f1f3;
     padding-left:3px;
 }
 
-div#lbb li:hover {
+div.leftNav li:hover {
     color:#575c63;
     background-color:#d6dce0;
 }
@@ -154,7 +154,7 @@ div#lbb li:hover {
 }
 
 /*Блок контента*/
-#cont {
+.contTable {
     display: block;
     position: absolute;
     top:70px;
@@ -165,21 +165,24 @@ div#lbb li:hover {
     background-color:#f0f1f3;
 }
 
-#cont table, #cont td {
-    /*border:1px solid #red;*/
+.contTable table {
     border-collapse:collapse;
 }
 
-#cont tr:nth-child(odd){
+.contTable tr:nth-child(odd){
     background-color:#d6dde8;
 }
 
-#cont tr, #cont td{
+.contTable tr:nth-child(even){
+    background-color:#fff;
+}
+
+.contTable tr, .contTable td {
     min-height:10px;
     height:10px;
 }
 
-#cont table thead td {
+.contTable table thead td {
     position:relative;
     background-color:#d6dde8!important;
     border: 1px solid #000;
@@ -189,8 +192,17 @@ div#lbb li:hover {
     z-index:100;
 }
 
-td {
+.contTable td, .tableHead {
     border: 1px solid #000;
+}
+
+.tableHead {
+    position:absolute;
+    width:calc(100% + 2px);
+    height:calc(100% + 2px);
+    top:-1px;
+    left:-1px;
+    z-index: -10;
 }
 
 /*Модальное окно*/
